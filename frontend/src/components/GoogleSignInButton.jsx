@@ -15,4 +15,4 @@ const GoogleSignInButton = ({ onClick, text = 'Sign in with Google' }) => (
   </button>
 );
 
-export default GoogleSignInButton; 
+export default GoogleSignInButton;
