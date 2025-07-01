@@ -7,13 +7,53 @@ generator client {
   provider = "prisma-client-js"
 }
 
-     model User {
-       id       Int     @id @default(autoincrement())
-       username String?
-       email    String  @unique
-       password String?
-       googleId String?
-       name     String?
-       resetToken        String?
-       resetTokenExpiry  DateTime?
-     }
+model User {
+  id               Int       @id @default(autoincrement())
+  username         String?   // nullable for Google users, required for manual sign up
+  email            String    @unique
+  password         String?   // nullable for Google users
+  googleId         String?   // for Google OAuth
+  name             String?   // display name
+  resetToken       String?
+  resetTokenExpiry DateTime?
+  boards           Board[]   @relation("UserBoards")
+  cards            Card[]    @relation("UserCards")
+  comments         Comment[]
+}
+
+model Board {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String?
+  category    String
+  image       String
+  author      User?    @relation("UserBoards", fields: [authorId], references: [id])
+  authorId    Int?
+  cards       Card[]
+  createdAt   DateTime @default(now())
+}
+
+model Card {
+  id          Int      @id @default(autoincrement())
+  message     String
+  gif         String
+  upvotes     Int      @default(0)
+  pinned      Boolean  @default(false)
+  pinnedAt    DateTime?
+  author      User?    @relation("UserCards", fields: [authorId], references: [id])
+  authorId    Int?
+  board       Board    @relation(fields: [boardId], references: [id])
+  boardId     Int
+  comments    Comment[]
+  createdAt   DateTime @default(now())
+}
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  message   String
+  author    User?    @relation(fields: [authorId], references: [id])
+  authorId  Int?
+  card      Card     @relation(fields: [cardId], references: [id])
+  cardId    Int
+  createdAt DateTime @default(now())
+}
