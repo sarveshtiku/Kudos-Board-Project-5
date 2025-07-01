@@ -20,7 +20,7 @@ export default function LoginPage() {
       const data = await response.json();
       if (response.ok) {
         localStorage.setItem('token', data.token);
-        window.location.href = '/dashboard';
+        window.location.href = '/home';
       } else {
         alert(data.message || 'Google login failed');
       }
@@ -42,7 +42,7 @@ export default function LoginPage() {
       const data = await response.json();
       if (response.ok) {
         localStorage.setItem('token', data.token);
-        window.location.href = '/dashboard';
+        window.location.href = '/home';
       } else {
         alert(data.message || 'Login failed');
       }
