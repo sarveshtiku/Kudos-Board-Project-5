@@ -1,23 +1,54 @@
-// frontend/src/pages/LoginPage.jsx
 import React, { useState } from 'react';
 import { GoogleLogin } from '@react-oauth/google';
-import jwt_decode from 'jwt-decode';
+import { Link } from 'react-router-dom';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleSuccess = credentialResponse => {
-    const user = jwt_decode(credentialResponse.credential);
-    console.log('Google user:', user);
-    // TODO: store token & redirect
+  // Get Google Client ID from environment variable
+  const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
+
+  const handleSuccess = async (credentialResponse) => {
+    const { credential } = credentialResponse;
+    try {
+      const response = await fetch('http://localhost:4000/api/auth/google', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ credential }),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        localStorage.setItem('token', data.token);
+        window.location.href = '/dashboard';
+      } else {
+        alert(data.message || 'Google login failed');
+      }
+    } catch (err) {
+      alert('Network error');
+    }
   };
+
   const handleError = () => console.error('Login Failed');
 
-  const handleSubmit = e => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // TODO: handle email/password login
-    alert('Email/password login not implemented.');
+    try {
+      const response = await fetch('http://localhost:4000/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        localStorage.setItem('token', data.token);
+        window.location.href = '/dashboard';
+      } else {
+        alert(data.message || 'Login failed');
+      }
+    } catch (err) {
+      alert('Network error');
+    }
   };
 
   return (
@@ -53,9 +84,9 @@ export default function LoginPage() {
               <label htmlFor="password" className="block text-sm font-medium text-gray-700">
                 Password
               </label>
-              <a href="#" className="text-sm text-indigo-600 hover:text-indigo-500 font-semibold">
+              <Link to="/forgot-password" className="text-sm text-indigo-600 hover:text-indigo-500 font-semibold">
                 Forgot password?
-              </a>
+              </Link>
             </div>
             <input
               id="password"
@@ -80,6 +111,7 @@ export default function LoginPage() {
         </div>
         <div className="w-full flex justify-center">
           <GoogleLogin
+            clientId={clientId}
             onSuccess={handleSuccess}
             onError={handleError}
             useOneTap
@@ -87,6 +119,9 @@ export default function LoginPage() {
             shape="pill"
             className="w-full flex justify-center p-0"
           />
+        </div>
+        <div className="mt-4 text-center w-full">
+          <Link to="/signup" className="text-blue-600 hover:underline">Back to Sign Up</Link>
         </div>
       </div>
     </div>
