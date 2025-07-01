@@ -37,7 +37,7 @@ export default function SignUpPage() {
         data = await response.json();
         if (response.ok) {
           localStorage.setItem('token', data.token);
-          window.location.href = '/dashboard';
+          window.location.href = '/home';
         } else if (response.status === 409) {
           // User already exists, redirect to login
           navigate('/login');
@@ -83,7 +83,7 @@ export default function SignUpPage() {
         setSuccess('');
       } else if (data.token) {
         localStorage.setItem('token', data.token);
-        window.location.href = '/dashboard';
+        window.location.href = '/home';
       } else {
         setError(data.message || 'Google sign up failed');
       }
