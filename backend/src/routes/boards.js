@@ -2,12 +2,19 @@ const express = require('express');
 const router = express.Router();
 const controller = require('../controllers/boardControllers');
 
+// Get all boards (with optional filters in controller)
 router.get("/", controller.getAllBoards);
-router.get("/:id", controller.getBoardById);  // loading in singular board
-router.post("/", controller.createBoard);
-router.post("/:boardId/cards", controller.addNewCard);  // do we want to add new cards via the card or board controllers
-router.put("/:id", controller.updateBoard);  // should we be able to edit the boards name etc ?? (not done in kudos board website.)
-router.delete("/:id", controller.deleteBoard);
 
+// Get a single board by ID (with cards)
+router.get("/:id", controller.getBoardById);
+
+// Create a new board
+router.post("/", controller.createBoard);
+
+// Add a new card to a board
+router.post("/:boardId/cards", controller.addNewCard);
+
+// Delete a board (cascade deletes cards/comments)
+router.delete("/:id", controller.deleteBoard);
 
 module.exports = router;
