@@ -89,11 +89,18 @@ exports.pinCard = async (req, res) => {
 // Delete a card
 exports.deleteCard = async (req, res) => {
   const id = Number(req.params.id);
+  const userId = req.user?.userId; // user ID already set up
   try {
+    const card = await prisma.card.findUnique({ where: { id } });
+    if (!card) return res.status(404).json({ error: 'Card not found' });
+
+    if (card.authorId && card.authorId !== userId) {
+      return res.status(403).json({ error: 'Not allowed to delete this card' }); // guests not allowed to delete cards
+    }
     await prisma.card.delete({ where: { id } });
     res.json({ message: 'Card deleted' });
   } catch (err) {
-    res.status(500).json({ error: 'Failed to delete card' });
+    res.status(500).json({ error: 'Failed to delete card' }); // if card already deleted by some other user in the session
   }
 };
 
