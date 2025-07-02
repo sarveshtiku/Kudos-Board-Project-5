@@ -4,6 +4,9 @@ import Header from '../components/Header.jsx';
 import Footer from '../components/Footer.jsx';
 import logo from '../components/logo.png';
 import './HomePage.css';
+import { createBoard } from '../api/apiService';
+import { getBoards, getMyProfile } from '../api/apiService';
+
 
 function HomePage() {
   const [boards, setBoards] = useState([]);
@@ -24,20 +27,21 @@ function HomePage() {
   }, []);
 
   const fetchBoards = async () => {
-    const response = await fetch('/api/boards');
-    let data = await response.json();
-    if (data.length === 0) {
-      data = [{
-        id: 'welcome',
-        title: 'Welcome to Kudos!',
-        description: 'Start your first kudos board by filling out the form below.',
-        category: 'Welcome',
-        author: 'System',
-        image: 'https://media.giphy.com/media/3o7aCVpL3yLS5QfU4o/giphy.gif'
-      }];
+  const token = localStorage.getItem('token');
+  let boards = [];
+  if (token) {
+    try {
+      const user = await getMyProfile(token);
+      boards = await getBoards(token, user.id); // getBoards should accept authorId
+    } catch (err) {
+      // fallback to all boards if user fetch fails
+      boards = await getBoards();
     }
-    setBoards(data);
-  };
+  } else {
+    boards = await getBoards();
+  }
+  setBoards(boards);
+};
 
   const handleSearch = () => {
     const filtered = boards.filter(board =>
@@ -71,20 +75,21 @@ function HomePage() {
   };
 
   const handleCreateBoard = async () => {
-    const { title, category, description, image } = newBoard;
-    if (!title || !category || !description || !image) {
-      return alert('Title, Category, Description, and Image are required');
-    }
-    const response = await fetch('/api/boards', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(newBoard),
-    });
-    const created = await response.json();
+  const { title, category, description, image } = newBoard;
+  if (!title || !category || !description || !image) {
+    return alert('Title, Category, Description, and Image are required');
+  }
+  try {
+    const token = localStorage.getItem('token'); // get JWT if user is logged in
+    const created = await createBoard({ title, category, description, image }, token);
     setBoards(prev => [created, ...prev]);
     setActiveBoard(created);
     setNewBoard({ title: '', category: '', description: '', image: '', author: '' });
-  };
+    setShowCreateModal(false); // close modal after creation
+  } catch (err) {
+    alert(err.message);
+  }
+};
 
   const handleDeleteBoard = async (id) => {
     await fetch(`/api/boards/${id}`, { method: 'DELETE' });
