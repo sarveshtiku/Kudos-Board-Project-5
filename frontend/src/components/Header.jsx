@@ -20,8 +20,12 @@ function Header() {
           <SearchBar />
            <div className="auth-buttons-overlay">
         <div className="auth-buttons">
-          <button className="login-button">Sign In</button>
-          <button className="signup-button">Sign Up</button>
+          <Link to="/login">
+            <button className="login-button">Sign In</button>
+          </Link>
+          <Link to="/signup">
+            <button className="signup-button">Sign Up</button>
+          </Link>
         </div>
       </div>
         </div>
