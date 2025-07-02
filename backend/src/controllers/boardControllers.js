@@ -3,18 +3,19 @@ const prisma = new PrismaClient();
 
 // Get all boards (with cards)
 exports.getAllBoards = async (req, res) => {
-  const { category, search } = req.query;
+  const { category, search, authorId } = req.query;
   try {
+    const where = {};
+    if (category) where.category = category;
+    if (authorId) where.authorId = Number(authorId);
+    if (search) {
+      where.OR = [
+        { title: { contains: search } },
+        { description: { not: null, contains: search } }
+      ];
+    }
     const boards = await prisma.board.findMany({
-      where: {
-        ...(category && { category }),
-        ...(search && {
-          OR: [
-            { title: { contains: search } },
-            { description: { not: null, contains: search } }
-          ]
-        })
-      },
+      where,
       include: { cards: true }
     });
     res.json(boards);
@@ -40,26 +41,27 @@ exports.getBoardById = async (req, res) => {
 };
 
 // Create a new board
-exports.createBoard = async (req, res) => {
-  const { title, description, category, image, authorId } = req.body;
-  if (!title || !category || !image) {
-    return res.status(400).json({ error: 'Title, category, and image are required' });
-  }
-  try {
-    const board = await prisma.board.create({
-      data: {
-        title,
-        description,
-        category,
-        image,
-        authorId: authorId || null, // allow anonymous boards
-      }
-    });
-    res.status(201).json(board);
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to create board' });
-  }
-};
+  exports.createBoard = async (req, res) => {
+    const { title, description, category, image } = req.body;
+    const authorId = req.user?.userId || null; // Always use the logged-in user's ID, or null for guests
+    if (!title || !category || !image) {
+      return res.status(400).json({ error: 'Title, category, and image are required' });
+    }
+    try {
+      const board = await prisma.board.create({
+        data: {
+          title,
+          description,
+          category,
+          image,
+          authorId,
+        }
+      });
+      res.status(201).json(board);
+    } catch (err) {
+      res.status(500).json({ error: 'Failed to create board' });
+    }
+  };
 
 // Add a new card to a board
 exports.addNewCard = async (req, res) => {
@@ -86,16 +88,14 @@ exports.addNewCard = async (req, res) => {
 // Delete a board (and cascade delete its cards/comments)
 exports.deleteBoard = async (req, res) => {
   const id = Number(req.params.id);
-  const userId = req.user?.userId; // Will be undefined for users without an account
+  const userId = req.user?.userId;
   try {
     const board = await prisma.board.findUnique({ where: { id } });
     if (!board) return res.status(404).json({ error: 'Board not found' });
-
-    // If board has an author, only that user can delete
+    // Only allow delete if board is anonymous or owned by current user
     if (board.authorId && board.authorId !== userId) {
       return res.status(403).json({ error: 'Not allowed to delete this board' });
     }
-    // If board.authorId is null, allow anyone to delete (guest board)
     await prisma.board.delete({ where: { id } });
     res.json({ message: 'Board deleted' });
   } catch (err) {
