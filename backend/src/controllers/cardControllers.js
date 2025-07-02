@@ -8,16 +8,14 @@ exports.getCardsForBoard = async (req, res) => {
   if (!boardId) {
     return res.status(400).json({ error: 'Missing or invalid boardId' });
   }
-  const { search, pinned } = req.query;
+  const { search, pinned, authorId } = req.query;
   try {
+    const where = { boardId };
+    if (typeof pinned !== 'undefined') where.pinned = pinned === 'true';
+    if (authorId) where.authorId = Number(authorId);
+    if (search) where.message = { contains: search };
     const cards = await prisma.card.findMany({
-      where: {
-        boardId,
-        ...(typeof pinned !== 'undefined' && { pinned: pinned === 'true' }),
-        ...(search && {
-          message: { contains: search }
-        })
-      },
+      where,
       orderBy: [
         { pinned: 'desc' },
         { pinnedAt: 'desc' },
@@ -35,7 +33,8 @@ exports.getCardsForBoard = async (req, res) => {
 // Create a new card for a board
 exports.createCard = async (req, res) => {
   const boardId = Number(req.params.boardId);
-  const { message, gif, authorId } = req.body;
+  const { message, gif } = req.body;
+  const authorId = req.user?.userId || null;
   if (!message || !gif) {
     return res.status(400).json({ error: 'Message and gif are required' });
   }
@@ -45,7 +44,7 @@ exports.createCard = async (req, res) => {
         message,
         gif,
         boardId,
-        authorId: authorId || null, // allow anonymous cards
+        authorId,
       }
     });
     res.status(201).json(card);
@@ -89,18 +88,18 @@ exports.pinCard = async (req, res) => {
 // Delete a card
 exports.deleteCard = async (req, res) => {
   const id = Number(req.params.id);
-  const userId = req.user?.userId; // user ID already set up
+  const userId = req.user?.userId;
   try {
     const card = await prisma.card.findUnique({ where: { id } });
     if (!card) return res.status(404).json({ error: 'Card not found' });
-
+    // Only allow delete if card is anonymous or owned by current user
     if (card.authorId && card.authorId !== userId) {
-      return res.status(403).json({ error: 'Not allowed to delete this card' }); // guests not allowed to delete cards
+      return res.status(403).json({ error: 'Not allowed to delete this card' });
     }
     await prisma.card.delete({ where: { id } });
     res.json({ message: 'Card deleted' });
   } catch (err) {
-    res.status(500).json({ error: 'Failed to delete card' }); // if card already deleted by some other user in the session
+    res.status(500).json({ error: 'Failed to delete card' });
   }
 };
 

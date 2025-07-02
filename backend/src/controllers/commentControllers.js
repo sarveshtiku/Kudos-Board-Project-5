@@ -18,11 +18,9 @@ exports.getCommentsForCard = async (req, res) => {
 
 // Add a comment to a card
 exports.addComment = async (req, res) => {
-  // ensuring guests cannot comment
   if (!req.user) {
     return res.status(401).json({ error: 'Login required to comment' });
   }
-  //users with id can comment
   const cardId = Number(req.params.cardId);
   const { message, authorId } = req.body;
   if (!message) {
@@ -33,7 +31,7 @@ exports.addComment = async (req, res) => {
       data: {
         message,
         cardId,
-        authorId: authorId || null // allow anonymous comments
+        authorId: req.user.userId // always use logged-in user's id
       },
       include: { author: true }
     });
