@@ -1,0 +1,67 @@
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 30px;
+  background-color: #fef6ff;
+  border-bottom: 2px solid #e0d0ff;
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  gap: 10px;
+}
+
+.logo a {
+  font-size: 1.6rem;
+  font-weight: bold;
+  color: black;
+  text-decoration: none;
+}
+
+.auth-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.login-button,
+.signup-button {
+  padding: 8px 16px;
+  font-size: 0.9rem;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.3s ease;
+}
+
+.login-button {
+  background-color: #ffe0f0;
+  color: #d63384;
+}
+
+.login-button:hover {
+  background-color: #ffcce0;
+}
+
+.signup-button {
+  background-color: #d0f0c0;
+  color: #2d6a4f;
+}
+
+.signup-button:hover {
+  background-color: #b6e6a3;
+}
+
+.logo-img {
+  height: 50px;
+  width: auto;
+}

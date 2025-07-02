@@ -1,0 +1,24 @@
+.footer-content p {
+  margin: 6px 0;
+  font-size: 14px;
+}
+
+.footer-content p:first-child {
+  font-weight: 500;
+  font-size: 15px;
+}
+
+.footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: black;
+  color: #c0b5d0;
+  padding: 24px 16px;
+  text-align: center;
+  font-family: 'Inter', sans-serif;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+  border-top: 1px solid #e5e5e5;
+  z-index: 999;
+}
