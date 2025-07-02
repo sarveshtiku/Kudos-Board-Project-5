@@ -8,6 +8,7 @@ import { createBoard } from '../api/apiService';
 import { getBoards, getMyProfile } from '../api/apiService';
 
 
+
 function HomePage() {
   const [boards, setBoards] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -80,12 +81,12 @@ function HomePage() {
     return alert('Title, Category, Description, and Image are required');
   }
   try {
-    const token = localStorage.getItem('token'); // get JWT if user is logged in
+    const token = localStorage.getItem('token');
     const created = await createBoard({ title, category, description, image }, token);
     setBoards(prev => [created, ...prev]);
     setActiveBoard(created);
-    setNewBoard({ title: '', category: '', description: '', image: '', author: '' });
-    setShowCreateModal(false); // close modal after creation
+    setNewBoard({ title: '', category: '', description: '', image: '' });
+    setShowCreateModal(false);
   } catch (err) {
     alert(err.message);
   }
