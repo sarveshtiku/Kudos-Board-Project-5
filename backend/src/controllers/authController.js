@@ -25,34 +25,14 @@ exports.googleLogin = async (req, res) => {
     const { email, sub: googleId, name } = googleRes.data;
     let user = await prisma.user.findUnique({ where: { email } });
     if (!user) {
-      // Instead of creating the user, prompt for username/password
-      return res.json({ needsUsername: true, email, googleId, name });
+      user = await prisma.user.create({
+        data: { email, googleId, name }
+      });
     }
     const token = jwt.sign({ userId: user.id, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
     res.json({ token });
   } catch (err) {
     res.status(401).json({ message: 'Invalid Google token' });
-  }
-};
-
-exports.completeGoogleSignup = async (req, res) => {
-  const { email, googleId, name, username, password } = req.body;
-  if (!email || !googleId || !username || !password) {
-    return res.status(400).json({ message: 'All fields are required' });
-  }
-  try {
-    let user = await prisma.user.findUnique({ where: { email } });
-    if (user) {
-      return res.status(409).json({ message: 'User already exists' });
-    }
-    const hashedPassword = await bcrypt.hash(password, 10);
-    user = await prisma.user.create({
-      data: { email, googleId, name, username, password: hashedPassword }
-    });
-    const token = jwt.sign({ userId: user.id, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
-    res.status(201).json({ token });
-  } catch (err) {
-    res.status(500).json({ message: 'Server error' });
   }
 };
 
@@ -95,6 +75,37 @@ exports.forgotPassword = async (req, res) => {
     }
     // Always respond with the same message for security
     res.json({ message: 'If an account with that email exists, a reset link has been sent.' });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+exports.completeGoogleSignup = async (req, res) => {
+  const { email, googleId, name, username, password } = req.body;
+  if (!email || !googleId || !username || !password) {
+    return res.status(400).json({ message: 'All fields are required' });
+  }
+  try {
+    let user = await prisma.user.findUnique({ where: { email } });
+    if (!user) {
+      // User does not exist, create new
+      const hashedPassword = await bcrypt.hash(password, 10);
+      user = await prisma.user.create({
+        data: { email, googleId, name, username, password: hashedPassword }
+      });
+    } else if (!user.username || !user.password) {
+      // User exists but needs to complete profile
+      const hashedPassword = await bcrypt.hash(password, 10);
+      user = await prisma.user.update({
+        where: { email },
+        data: { username, password: hashedPassword, name }
+      });
+    } else {
+      // User already completed signup
+      return res.status(409).json({ message: 'Account already completed. Please log in.' });
+    }
+    const token = jwt.sign({ userId: user.id, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
+    res.status(201).json({ token });
   } catch (err) {
     res.status(500).json({ message: 'Server error' });
   }
