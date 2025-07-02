@@ -104,7 +104,7 @@ exports.deleteCard = async (req, res) => {
   }
 };
 
-// (Optional) Giphy search
+// Giphy search
 const { searchGifs } = require('../utils/giphy');
 exports.searchGiphy = async (req, res) => {
   const { q } = req.query;
