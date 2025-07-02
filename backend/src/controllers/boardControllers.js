@@ -86,10 +86,17 @@ exports.addNewCard = async (req, res) => {
 // Delete a board (and cascade delete its cards/comments)
 exports.deleteBoard = async (req, res) => {
   const id = Number(req.params.id);
+  const userId = req.user?.userId; // Will be undefined for users without an account
   try {
-    await prisma.board.delete({
-      where: { id }
-    });
+    const board = await prisma.board.findUnique({ where: { id } });
+    if (!board) return res.status(404).json({ error: 'Board not found' });
+
+    // If board has an author, only that user can delete
+    if (board.authorId && board.authorId !== userId) {
+      return res.status(403).json({ error: 'Not allowed to delete this board' });
+    }
+    // If board.authorId is null, allow anyone to delete (guest board)
+    await prisma.board.delete({ where: { id } });
     res.json({ message: 'Board deleted' });
   } catch (err) {
     res.status(500).json({ error: 'Failed to delete board' });
