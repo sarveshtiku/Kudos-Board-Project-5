@@ -3,14 +3,23 @@ const prisma = new PrismaClient();
 
 // Get all boards (with cards)
 exports.getAllBoards = async (req, res) => {
+  const { category, search } = req.query;
   try {
     const boards = await prisma.board.findMany({
-      include: {
-        cards: true,
-      }
+      where: {
+        ...(category && { category }),
+        ...(search && {
+          OR: [
+            { title: { contains: search } },
+            { description: { not: null, contains: search } }
+          ]
+        })
+      },
+      include: { cards: true }
     });
     res.json(boards);
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: 'Failed to fetch boards' });
   }
 };

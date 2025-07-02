@@ -12,4 +12,10 @@ app.use(express.json());
 const authRoutes = require('./routes/auth');
 app.use('/api/auth', authRoutes);
 
+const commentsRoutes = require('./routes/comments');
+app.use('/api/comments', commentsRoutes);
+
+const userRoutes = require('./routes/user');
+app.use('/api/user', userRoutes);
+
 module.exports = app;
