@@ -4,9 +4,6 @@ import Header from '../components/Header.jsx';
 import Footer from '../components/Footer.jsx';
 import logo from '../components/logo.png';
 import './HomePage.css';
-import { createBoard } from '../api/apiService';
-import { getBoards, getMyProfile } from '../api/apiService';
-
 
 
 function HomePage() {
@@ -28,21 +25,20 @@ function HomePage() {
   }, []);
 
   const fetchBoards = async () => {
-  const token = localStorage.getItem('token');
-  let boards = [];
-  if (token) {
-    try {
-      const user = await getMyProfile(token);
-      boards = await getBoards(token, user.id); // getBoards should accept authorId
-    } catch (err) {
-      // fallback to all boards if user fetch fails
-      boards = await getBoards();
+    const response = await fetch('/api/boards');
+    let data = await response.json();
+    if (data.length === 0) {
+      data = [{
+        id: 'welcome',
+        title: 'Welcome to Kudos!',
+        description: 'Start your first kudos board by filling out the form below.',
+        category: 'Welcome',
+        author: 'System',
+        image: 'https://media.giphy.com/media/3o7aCVpL3yLS5QfU4o/giphy.gif'
+      }];
     }
-  } else {
-    boards = await getBoards();
-  }
-  setBoards(boards);
-};
+    setBoards(data);
+  };
 
   const handleSearch = () => {
     const filtered = boards.filter(board =>
@@ -76,6 +72,7 @@ function HomePage() {
   };
 
   const handleCreateBoard = async () => {
+
   const { title, category, description, image } = newBoard;
   if (!title || !category || !description || !image) {
     return alert('Title, Category, Description, and Image are required');
@@ -91,6 +88,22 @@ function HomePage() {
     alert(err.message);
   }
 };
+
+    const { title, category, description, image } = newBoard;
+    if (!title || !category || !description || !image) {
+      return alert('Title, Category, Description, and Image are required');
+    }
+    const response = await fetch('/api/boards', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newBoard),
+    });
+    const created = await response.json();
+    setBoards(prev => [created, ...prev]);
+    setActiveBoard(created);
+    setNewBoard({ title: '', category: '', description: '', image: '', author: '' });
+  };
+
 
   const handleDeleteBoard = async (id) => {
     await fetch(`/api/boards/${id}`, { method: 'DELETE' });

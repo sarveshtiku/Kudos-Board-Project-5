@@ -4,6 +4,7 @@ import './Header.css';
 import logo from '../components/logo.png';
 import SearchBar from '../components/SearchBar.jsx';
 
+
 function Header() {
   return (
     <>
