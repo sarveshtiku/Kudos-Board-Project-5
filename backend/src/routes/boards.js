@@ -10,10 +10,11 @@ router.get("/", controller.getAllBoards);
 router.get("/:id", controller.getBoardById);
 
 // Create a new board
-router.post("/", auth, controller.createBoard);
+router.post("/", controller.createBoard);
 
 // Add a new card to a board
 router.post("/:boardId/cards", auth, controller.addNewCard);
+
 
 // Delete a board (cascade deletes cards/comments)
 router.delete("/:id", auth, controller.deleteBoard);

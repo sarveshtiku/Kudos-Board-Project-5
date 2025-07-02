@@ -1,7 +1,7 @@
 const API_BASE = "http://localhost:4000/api";
 
 export async function createBoard(board, token) {
-  const res = await fetch(`${API_BASE}/boards`, {
+  const res = await fetch("http://localhost:4000/api/boards", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
