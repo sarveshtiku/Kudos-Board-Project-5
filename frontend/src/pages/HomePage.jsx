@@ -9,7 +9,6 @@ import { getMyProfile } from '../api/apiService';
 
 function HomePage() {
   const [boards, setBoards] = useState([]);
-  const navigate = useNavigate();
   const [userBoards, setUserBoards] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState('All');
@@ -121,15 +120,6 @@ function HomePage() {
       console.error('Error creating board:', error);
       alert(`Failed to create board: ${error.message}`);
     }
-    const created = await response.json();
-    setBoards(prev => [created, ...prev]);
-    setUserBoards(prev => [created, ...prev]);
-    setActiveBoard(created);
-    setNewBoard({ title: '', category: '', description: '', image: '' });
-    setShowCreateModal(false);
-  } catch (error) {
-    alert(`Failed to create board: ${error.message}`);
-  }
 };
 
   const handleDeleteBoard = async (id) => {
@@ -227,7 +217,7 @@ function HomePage() {
             key={board.id}
             board={board}
             onDelete={handleDeleteBoard}
-            onClick={() => navigate(`/boards/${board.id}`)}
+            onView={() => navigate(`/boards/${board.id}`)}
             author={board.author}
           />
         ))}
@@ -240,7 +230,7 @@ function HomePage() {
               <BoardCard
                 key={board.id}
                 board={board}
-                onDelete={handleDeleteBoard}
+                onView={handleDeleteBoard}
                 onClick={() => navigate(`/boards/${board.id}`)}
                 author={board.author}
               />

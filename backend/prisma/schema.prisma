@@ -53,7 +53,7 @@ model Comment {
   message   String
   author    User?    @relation(fields: [authorId], references: [id])
   authorId  Int?
-  card      Card     @relation(fields: [cardId], references: [id])
+  card      Card     @relation(fields: [cardId], references: [id], onDelete: Cascade)
   cardId    Int
   createdAt DateTime @default(now())
 }
