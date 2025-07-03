@@ -7,6 +7,7 @@ import './HomePage.css';
 
 function HomePage() {
   const [boards, setBoards] = useState([]);
+  const [userBoards, setUserBoards] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState('All');
   const [newBoard, setNewBoard] = useState({
@@ -22,10 +23,12 @@ function HomePage() {
   useEffect(() => {
     fetchBoards();
   }, []);
-
+'/api/boards'
+'http:localhost'
   const fetchBoards = async () => {
-    const response = await fetch('/api/boards');
+    const response = await fetch('http://localhost:4000/api/boards');
     let data = await response.json();
+    console.log(data);
     if (data.length === 0) {
       data = [{
         id: 'welcome',
@@ -82,6 +85,7 @@ function HomePage() {
     });
     const created = await response.json();
     setBoards(prev => [created, ...prev]);
+    setUserBoards(prev => [created, ...prev]); // Add to user's boards
     setActiveBoard(created);
     setNewBoard({ title: '', category: '', description: '', image: '', author: '' });
   };
@@ -95,6 +99,9 @@ function HomePage() {
   const handleLogoClick = () => {
     window.location.reload();
   };
+  if (!boards.length) {
+    return <div>loading</div>
+  }
 
   return (
     <div className="homepage">
@@ -139,6 +146,17 @@ function HomePage() {
           <BoardCard key={board.id} board={board} onDelete={handleDeleteBoard} onClick={() => setActiveBoard(board)} />
         ))}
       </div>
+
+      {userBoards.length > 0 && (
+        <div className="user-board-list">
+          <h2>Your Created Boards</h2>
+          <div className="board-grid">
+            {userBoards.map(board => (
+              <BoardCard key={board.id} board={board} onDelete={handleDeleteBoard} onClick={() => setActiveBoard(board)} />
+            ))}
+          </div>
+        </div>
+      )}
 
       {activeBoard && (
         <div className="modal-backdrop" onClick={() => setActiveBoard(null)}>

@@ -1,8 +1,8 @@
- 
 import React from "react";
 import "./BoardCard.css";
 
-const BoardCard = ({ title, description, category, image, authorName, createdAt }) => {
+const BoardCard = ({ board }) => {
+  const { title, description, category, image, authorName, createdAt } = board;
   return (
     <div className="board-card">
       <img src={image} alt={title} className="board-image" />
@@ -13,7 +13,7 @@ const BoardCard = ({ title, description, category, image, authorName, createdAt 
         <div className="board-footer">
           {authorName && <span className="board-author">By {authorName}</span>}
           <span className="board-date">{new Date(createdAt).toLocaleDateString()}</span>
-        </div>
+        </div> 
       </div>
     </div>
   );
