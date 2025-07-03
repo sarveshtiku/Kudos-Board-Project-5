@@ -11,7 +11,7 @@ function HomePage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState('All');
   const [newBoard, setNewBoard] = useState({
-    title: '',
+    title: '', 
     category: '',
     description: '',
     image: '',
@@ -86,7 +86,7 @@ function HomePage() {
   };
 
   const handleCreateBoard = async () => {
-    const { title, category, description, image } = newBoard;
+    const { title, category, description, image, author } = newBoard;
     if (!title || !category || !description || !image) {
       return alert('Title, Category, Description, and Image are required');
     }
@@ -107,7 +107,7 @@ function HomePage() {
       setUserBoards(prev => [created, ...prev]);
       setActiveBoard(created);
       setNewBoard({ title: '', category: '', description: '', image: '', author: '' });
-      console.log(err.message('Not setting'))
+      console.log('Board created:', created);
       setShowCreateModal(false);
     } catch (error) {
       console.error('Error creating board:', error);
