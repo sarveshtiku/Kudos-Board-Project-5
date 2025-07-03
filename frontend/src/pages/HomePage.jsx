@@ -5,7 +5,6 @@ import Footer from '../components/Footer.jsx';
 import logo from '../components/logo.png';
 import './HomePage.css';
 
-
 function HomePage() {
   const [boards, setBoards] = useState([]);
   const [userBoards, setUserBoards] = useState([]);
@@ -24,23 +23,35 @@ function HomePage() {
   useEffect(() => {
     fetchBoards();
   }, []);
-'/api/boards'
-'http:localhost'
+
   const fetchBoards = async () => {
-    const response = await fetch('http://localhost:4000/api/boards');
-    let data = await response.json();
-    console.log(data);
-    if (data.length === 0) {
-      data = [{
+    try {
+      const response = await fetch('http://localhost:4000/api/boards');
+      let data = await response.json();
+      console.log(data);
+      if (data.length === 0) {
+        data = [{
+          id: 'welcome',
+          title: 'Welcome to Kudos!',
+          description: 'Start your first kudos board by filling out the form below.',
+          category: 'Welcome',
+          author: 'System',
+          image: 'https://media.giphy.com/media/3o7aCVpL3yLS5QfU4o/giphy.gif'
+        }];
+      }
+      setBoards(data);
+    } catch (error) {
+      console.error('Error fetching boards:', error);
+      // Set welcome board on error
+      setBoards([{
         id: 'welcome',
         title: 'Welcome to Kudos!',
         description: 'Start your first kudos board by filling out the form below.',
         category: 'Welcome',
         author: 'System',
         image: 'https://media.giphy.com/media/3o7aCVpL3yLS5QfU4o/giphy.gif'
-      }];
+      }]);
     }
-    setBoards(data);
   };
 
   const handleSearch = () => {
@@ -75,56 +86,62 @@ function HomePage() {
   };
 
   const handleCreateBoard = async () => {
-
-  const { title, category, description, image } = newBoard;
-  if (!title || !category || !description || !image) {
-    return alert('Title, Category, Description, and Image are required');
-  }
-  try {
-    const token = localStorage.getItem('token');
-    const created = await createBoard({ title, category, description, image }, token);
-    setBoards(prev => [created, ...prev]);
-    setActiveBoard(created);
-    setNewBoard({ title: '', category: '', description: '', image: '' });
-    setShowCreateModal(false);
-  } catch (err) {
-    alert(err.message);
-  }
-};
-
     const { title, category, description, image } = newBoard;
     if (!title || !category || !description || !image) {
       return alert('Title, Category, Description, and Image are required');
     }
-    const response = await fetch('/api/boards', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(newBoard),
-    });
-    const created = await response.json();
-    setBoards(prev => [created, ...prev]);
-    setUserBoards(prev => [created, ...prev]); // Add to user's boards
-    setActiveBoard(created);
-    setNewBoard({ title: '', category: '', description: '', image: '', author: '' });
+    
+    try {
+      const response = await fetch('http://localhost:4000/api/boards', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newBoard),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to create board: ${response.status}`);
+      }
+      
+      const created = await response.json();
+      setBoards(prev => [created, ...prev]);
+      setUserBoards(prev => [created, ...prev]);
+      setActiveBoard(created);
+      setNewBoard({ title: '', category: '', description: '', image: '', author: '' });
+      setShowCreateModal(false);
+    } catch (error) {
+      console.error('Error creating board:', error);
+      alert(`Failed to create board: ${error.message}`);
+    }
   };
 
-
   const handleDeleteBoard = async (id) => {
-    await fetch(`/api/boards/${id}`, { method: 'DELETE' });
-    fetchBoards();
+    try {
+      const response = await fetch(`http://localhost:4000/api/boards/${id}`, { 
+        method: 'DELETE' 
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to delete board: ${response.status}`);
+      }
+      
+      fetchBoards();
+    } catch (error) {
+      console.error('Error deleting board:', error);
+      alert(`Failed to delete board: ${error.message}`);
+    }
   };
 
   // Function to reload the page and reset all state
   const handleLogoClick = () => {
     window.location.reload();
   };
+
   if (!boards.length) {
-    return <div>loading</div>
+    return <div>Loading...</div>;
   }
 
   return (
     <div className="homepage">
-
       <Header onLogoClick={handleLogoClick} />
 
       <div className="filters">
