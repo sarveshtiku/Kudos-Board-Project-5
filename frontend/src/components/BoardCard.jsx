@@ -10,7 +10,7 @@ const isOwner = currentUserId && ((authorId && authorId === currentUserId) || (a
   return (
     <div
       className="board-card"
-      onClick={() => onView(board)}
+      onClick={() => onView(board.id)}
       style={{ cursor: 'pointer', position: 'relative' }}
     >
       {/* Show author name if present */}

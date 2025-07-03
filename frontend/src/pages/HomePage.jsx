@@ -22,7 +22,6 @@ function HomePage() {
   const [activeBoard, setActiveBoard] = useState(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [currentUserId, setCurrentUserId] = useState(null);
-  const navigate = useNavigate();
 
   useEffect(() => {
     // Get logged-in user ID if available
@@ -121,16 +120,7 @@ function HomePage() {
       console.error('Error creating board:', error);
       alert(`Failed to create board: ${error.message}`);
     }
-    const created = await response.json();
-    setBoards(prev => [created, ...prev]);
-    setUserBoards(prev => [created, ...prev]);
-    setActiveBoard(created);
-    setNewBoard({ title: '', category: '', description: '', image: '' });
-    setShowCreateModal(false);
-  } catch (error) {
-    alert(`Failed to create board: ${error.message}`);
-  }
-};
+  };
 
   const handleDeleteBoard = async (id) => {
     const token = localStorage.getItem('token');
@@ -227,7 +217,7 @@ function HomePage() {
             key={board.id}
             board={board}
             onDelete={handleDeleteBoard}
-            onClick={() => navigate(`/boards/${board.id}`)}
+            onView={() => navigate(`/boards/${board.id}`)}
             author={board.author}
           />
         ))}
@@ -241,7 +231,7 @@ function HomePage() {
                 key={board.id}
                 board={board}
                 onDelete={handleDeleteBoard}
-                onClick={() => navigate(`/boards/${board.id}`)}
+                onView={() => navigate(`/boards/${board.id}`)}
                 author={board.author}
               />
             ))}

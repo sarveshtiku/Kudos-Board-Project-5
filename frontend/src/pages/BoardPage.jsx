@@ -1,22 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import BoardCard from '../components/BoardCard';
-
-// Mock components - you can replace these with your actual components
-const Header = () => (
-  <header style={{ padding: '1rem', backgroundColor: '#f5f5f5', borderBottom: '1px solid #ddd' }}>
-    <h1>Kudos Board</h1>
-  </header>
-);
-
-const Footer = () => (
-  <footer style={{ padding: '1rem', backgroundColor: '#f5f5f5', borderTop: '1px solid #ddd', marginTop: '2rem' }}>
-    <p>© 2025 Kudos Board</p>
-  </footer>
-);
+import Header from '../components/Header';
+import Footer from '../components/Footer';
 
 // Individual Card Component
-const Card = ({ card, isAuthenticated, onPin, onDelete, onComment }) => {
+const Card = ({ card, isAuthenticated, onPin, onDelete, onComment, onLike }) => {
   const [showComments, setShowComments] = useState(false);
   const [newComment, setNewComment] = useState('');
 
@@ -50,130 +39,183 @@ const Card = ({ card, isAuthenticated, onPin, onDelete, onComment }) => {
     }
   };
 
+  const handleLike = () => {
+    if (!isAuthenticated) {
+      alert('Please sign in to like cards');
+      window.location.href = '/login';
+      return;
+    }
+    onLike(card.id);
+  };
+
   return (
-    <div style={{
-      border: '1px solid #ddd',
-      borderRadius: '8px',
-      padding: '1rem',
-      margin: '1rem',
-      backgroundColor: 'white',
-      boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-      position: 'relative'
-    }}>
+    <div
+      style={{
+        background: 'linear-gradient(135deg, #fef2ff, #e5f0ff)',
+        borderRadius: '28px',
+        boxShadow: '0 12px 32px rgba(200, 180, 255, 0.3), 0 2px 8px rgba(180, 180, 255, 0.15)',
+        padding: '2rem',
+        margin: '0',
+        transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+        minHeight: '360px',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+        border: '2px solid #f8e8ff',
+        fontFamily: '"Comic Sans MS", "Poppins", cursive, sans-serif',
+        color: '#5c4f8a',
+        position: 'relative'
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.transform = 'scale(1.025)';
+        e.currentTarget.style.boxShadow = '0 20px 48px rgba(200, 180, 255, 0.35)';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.transform = 'scale(1)';
+        e.currentTarget.style.boxShadow = '0 12px 32px rgba(200, 180, 255, 0.3), 0 2px 8px rgba(180, 180, 255, 0.15)';
+      }}
+    >
       {card.pinned && (
         <div style={{
           position: 'absolute',
-          top: '8px',
-          right: '8px',
+          top: '14px',
+          right: '18px',
           backgroundColor: '#ffd700',
-          padding: '4px 8px',
-          borderRadius: '4px',
-          fontSize: '12px'
+          padding: '4px 12px',
+          borderRadius: '8px',
+          fontSize: '13px',
+          fontWeight: 600,
+          boxShadow: '0 2px 8px #ffe06655'
         }}>
           📌 Pinned
         </div>
       )}
-      
+
       {card.gif && (
-        <img 
-          src={card.gif} 
-          alt="Card GIF" 
-          style={{ width: '100%', height: '200px', objectFit: 'cover', borderRadius: '4px' }}
+        <img
+          src={card.gif}
+          alt="Card GIF"
+          style={{ width: '100%', height: 'auto', maxHeight: '300px', objectFit: 'contain', borderRadius: '12px', marginBottom: '0.75rem' }}
         />
       )}
-      
-      <p style={{ margin: '0.5rem 0', fontSize: '14px' }}>{card.message}</p>
-      
-      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginTop: '1rem' }}>
-        <button 
-          onClick={handlePin}
-          style={{
-            background: card.pinned ? '#ffd700' : '#f0f0f0',
-            border: 'none',
-            padding: '4px 8px',
-            borderRadius: '4px',
-            cursor: isAuthenticated ? 'pointer' : 'not-allowed',
-            opacity: isAuthenticated ? 1 : 0.5
-          }}
-        >
-          📌 {card.pinned ? 'Unpin' : 'Pin'}
-        </button>
-        
-        <button 
-          onClick={() => setShowComments(!showComments)}
-          style={{
-            background: '#f0f0f0',
-            border: 'none',
-            padding: '4px 8px',
-            borderRadius: '4px',
-            cursor: 'pointer'
-          }}
-        >
-          💬 {card.comments?.length || 0}
-        </button>
-        
-        <span style={{ fontSize: '12px', color: '#666' }}>
-          👍 {card.upvotes}
-        </span>
-        
+
+      <p style={{ margin: '0.5rem 0', fontSize: '1.1rem', color: '#5c5c8a', fontWeight: 500, flexGrow: 1 }}>{card.message}</p>
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginTop: '1.5rem' }}>
         {isAuthenticated && (
-          <button 
+          <button
+            onClick={handlePin}
+            style={{
+              background: card.pinned ? 'linear-gradient(90deg, #ffe066 80%, #fffbe6)' : '#f0f0f7',
+              border: 'none',
+              padding: '7px 16px',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              fontWeight: 600,
+              color: card.pinned ? '#7a6000' : '#5c5c8a',
+              boxShadow: card.pinned ? '0 2px 8px #ffe06655' : 'none',
+              transition: 'background 0.2s'
+            }}
+          >
+            📌 {card.pinned ? 'Unpin' : 'Pin'}
+          </button>
+        )}
+
+        {isAuthenticated && (
+          <button
+            onClick={() => setShowComments(!showComments)}
+            style={{
+              background: 'linear-gradient(90deg, #e0eaff 80%, #f6f7ff)',
+              border: 'none',
+              padding: '7px 16px',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              fontWeight: 600,
+              color: '#5c5c8a',
+              transition: 'background 0.2s'
+            }}
+          >
+            💬 {card.comments?.length || 0}
+          </button>
+        )}
+
+      <button
+  onClick={handleLike}
+  disabled={!isAuthenticated}
+  style={{
+    background: card.liked
+      ? 'linear-gradient(90deg, #ffd6eb 80%, #ffe6f2)'
+      : 'linear-gradient(90deg, #f0f0f0 80%, #fefefe)',
+    border: 'none',
+    padding: '7px 16px',
+    borderRadius: '8px',
+    cursor: isAuthenticated ? 'pointer' : 'not-allowed',
+    fontWeight: 600,
+    color: card.liked ? '#d63384' : '#888',
+    boxShadow: card.liked ? '0 2px 6px #f3c4ff66' : 'none'
+  }}
+>
+  {card.liked ? '💗' : '🤍'} {card.upvotes}
+</button>
+        {isAuthenticated && (
+          <button
             onClick={handleDelete}
             style={{
-              background: '#ff6b6b',
+              background: 'linear-gradient(90deg, #ffb3b3 80%, #ffeaea)',
               border: 'none',
-              padding: '4px 8px',
-              borderRadius: '4px',
+              padding: '7px 16px',
+              borderRadius: '8px',
               cursor: 'pointer',
-              color: 'white'
+              color: '#a21818',
+              fontWeight: 600,
+              transition: 'background 0.2s'
             }}
           >
             🗑️
           </button>
         )}
       </div>
-      
+
       {showComments && (
-        <div style={{ marginTop: '1rem', borderTop: '1px solid #eee', paddingTop: '1rem' }}>
+        <div style={{ marginTop: '1.2rem', borderTop: '1px solid #eee', paddingTop: '1rem' }}>
           <div style={{ maxHeight: '150px', overflowY: 'auto' }}>
             {card.comments?.map(comment => (
-              <div key={comment.id} style={{ marginBottom: '0.5rem', fontSize: '12px' }}>
+              <div key={comment.id} style={{ marginBottom: '0.5rem', fontSize: '13px', color: '#5c5c8a' }}>
                 <strong>{comment.author?.name || 'Anonymous'}:</strong> {comment.message}
               </div>
             ))}
           </div>
-          
-          {isAuthenticated && (
-            <div style={{ marginTop: '0.5rem', display: 'flex', gap: '0.5rem' }}>
-              <input
-                type="text"
-                value={newComment}
-                onChange={(e) => setNewComment(e.target.value)}
-                placeholder="Add a comment..."
-                style={{
-                  flex: 1,
-                  padding: '4px 8px',
-                  border: '1px solid #ddd',
-                  borderRadius: '4px',
-                  fontSize: '12px'
-                }}
-              />
-              <button
-                onClick={handleComment}
-                style={{
-                  background: '#4CAF50',
-                  color: 'white',
-                  border: 'none',
-                  padding: '4px 8px',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                  fontSize: '12px'
-                }}
-              >
-                Post
-              </button>
-            </div>
-          )}
+
+          <div style={{ marginTop: '0.7rem', display: 'flex', gap: '0.5rem' }}>
+            <input
+              type="text"
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
+              placeholder="Add a comment..."
+              style={{
+                flex: 1,
+                padding: '6px 12px',
+                border: '1px solid #ddd',
+                borderRadius: '6px',
+                fontSize: '13px'
+              }}
+            />
+            <button
+              onClick={handleComment}
+              style={{
+                background: 'linear-gradient(90deg, #aee6ae 80%, #eaffea)',
+                color: '#236e23',
+                border: 'none',
+                padding: '6px 18px',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                fontSize: '13px',
+                fontWeight: 600
+              }}
+            >
+              Post
+            </button>
+          </div>
         </div>
       )}
     </div>
@@ -376,7 +418,7 @@ const AddCardModal = ({ isOpen, onClose, onSubmit, isAuthenticated }) => {
               Cancel
             </button>
             <button
-              type="button"
+              alt= "addcard" type="button"
               onClick={handleSubmit}
               style={{
                 background: '#007bff',
@@ -470,6 +512,34 @@ const BoardPage = () => {
   }, [id]);
 
   // Handlers
+  const handleLikeCard = async (cardId) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`http://localhost:4000/api/cards/${cardId}/like`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        const updated = await response.json();
+setCards(prev =>
+  prev.map(card =>
+    card.id === cardId
+      ? {
+          ...card,
+          upvotes: updated.upvotes,
+          liked: updated.liked
+        }
+      : card
+  )
+);
+      }
+    } catch (error) {
+      console.error('Error liking card:', error);
+    }
+  };
   const handleAddCard = async (cardData) => {
     if (cardData.isGuest) {
       // Add to guest cards (temporary)
@@ -597,85 +667,111 @@ const BoardPage = () => {
     return 0;
   });
 
-  return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#f8f9fa' }}>
+return (
+    <div style={{
+      display: 'flex',
+      flexDirection: 'column',
+      minHeight: '100vh',
+      background: 'linear-gradient(135deg, #fef6ff, #e0f7fa)',
+      fontFamily: '"Poppins", sans-serif',
+      color: '#444'
+    }}>
       <Header />
-      
-      <main style={{ padding: '2rem' }}>
-        {board && (
-          <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-            <h1>{board.title}</h1>
-            <p style={{ color: '#666', fontSize: '16px' }}>{board.description}</p>
-            <div style={{ marginTop: '1rem' }}>
-              <span style={{ 
-                background: '#e9ecef', 
-                padding: '4px 8px', 
-                borderRadius: '12px', 
-                fontSize: '12px',
-                marginRight: '1rem'
-              }}>
-                {board.category}
-              </span>
-              <span style={{ fontSize: '14px', color: '#666' }}>
-                {isAuthenticated ? `Welcome, ${user?.name || user?.email}!` : 'Browsing as guest'}
-              </span>
+      <div style={{ flex: 1 }}>
+        <div style={{ marginBottom: '150px' }}>
+          <main style={{ padding: '2rem' }}>
+            {board && (
+              <div style={{ textAlign: 'center', marginTop: '100px', marginBottom: '2rem' }}>
+                {board.imageUrl && (
+                  <img 
+                    src={board.imageUrl}
+                    alt="Board"
+                    style={{
+                      maxWidth: '100%',
+                      maxHeight: '300px',
+                      objectFit: 'cover',
+                      borderRadius: '16px',
+                      marginBottom: '1.5rem'
+                    }}
+                  />
+                )}
+                <h1 style={{ fontSize: '2.5rem', color: '#6a4c93', marginBottom: '0.5rem' }}>{board.title}</h1>
+                <p style={{ color: '#888', fontSize: '16px', maxWidth: '600px', margin: '0 auto' }}>{board.description}</p>
+                <div style={{ marginTop: '1rem' }}>
+                  <span style={{ 
+                    background: '#fff5fc', 
+                    padding: '6px 12px', 
+                    borderRadius: '20px', 
+                    fontSize: '12px',
+                    marginRight: '1rem',
+                    border: '1px solid #f8daf8'
+                  }}>
+                    {board.category}
+                  </span>
+                  <span style={{ fontSize: '14px', color: '#999' }}>
+                    {isAuthenticated ? `Welcome, ${user?.name || user?.email}!` : 'Browsing as guest'}
+                  </span>
+                </div>
+              </div>
+            )}
+            
+            <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+              <button
+                onClick={() => setShowAddModal(true)}
+                style={{
+                  background: 'linear-gradient(135deg, #ffe6ff, #d0f0ff)',
+                  color: '#5c5c8a',
+                  border: '2px solid #fceaff',
+                  padding: '12px 28px',
+                  borderRadius: '30px',
+                  fontSize: '1rem',
+                  fontWeight: '600',
+                  fontFamily: '"Poppins", sans-serif',
+                  boxShadow: '0 6px 12px rgba(0, 0, 0, 0.1)',
+                  cursor: 'pointer',
+                  transition: 'transform 0.2s ease',
+                  letterSpacing: '0.5px',
+                  textShadow: '1px 1px 2px #ffffffaa'
+                }}
+              >
+                + Add Card ✨
+              </button>
             </div>
-          </div>
-        )}
-        
-        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <button
-            onClick={() => setShowAddModal(true)}
-            style={{
-              background: '#007bff',
-              color: 'white',
-              border: 'none',
-              padding: '12px 24px',
-              borderRadius: '6px',
-              fontSize: '16px',
-              cursor: 'pointer',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.5rem'
-            }}
-          >
-            + Add Card
-          </button>
+            
+            {allCards.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '3rem' }}>
+                <h3 style={{ color: '#888' }}>No cards yet 🫧</h3>
+                <p style={{ color: '#999' }}>Be the first to add a card to this board.</p>
+              </div>
+            ) : (
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+                gap: '2rem',
+                padding: '1rem'
+              }}>
+                {sortedCards.map(card => (
+                  <Card
+                    key={card.id}
+                    card={card}
+                    isAuthenticated={isAuthenticated}
+                    onPin={handlePinCard}
+                    onDelete={handleDeleteCard}
+                    onComment={handleComment}
+                    onLike={handleLikeCard}
+                  />
+                ))}
+              </div>
+            )}
+          </main>
         </div>
-        
-        {allCards.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '3rem' }}>
-            <h3 style={{ color: '#666' }}>No cards yet!</h3>
-            <p style={{ color: '#999' }}>Be the first to add a card to this board.</p>
-          </div>
-        ) : (
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-            gap: '1rem',
-            padding: '1rem'
-          }}>
-            {sortedCards.map(card => (
-              <Card
-                key={card.id}
-                card={card}
-                isAuthenticated={isAuthenticated}
-                onPin={handlePinCard}
-                onDelete={handleDeleteCard}
-                onComment={handleComment}
-              />
-            ))}
-          </div>
-        )}
-      </main>
-      
+      </div>
       <AddCardModal
         isOpen={showAddModal}
         onClose={() => setShowAddModal(false)}
         onSubmit={handleAddCard}
         isAuthenticated={isAuthenticated}
       />
-      
       <Footer />
     </div>
   );
