@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import BoardCard from '../components/BoardCard.jsx';
 import Header from '../components/Header.jsx';
 import Footer from '../components/Footer.jsx';
@@ -7,6 +8,7 @@ import './HomePage.css';
 
 function HomePage() {
   const [boards, setBoards] = useState([]);
+  const navigate = useNavigate();
   const [userBoards, setUserBoards] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState('All');
@@ -155,7 +157,7 @@ function HomePage() {
           <option value="Cute">Cute</option>
           <option value="Cool">Cool</option>
           {[...new Set(boards.map(board => board.category))]
-            .filter(category => !['s', 'e', 'happy', 'sad'].includes(category.toLowerCase()))
+            .filter(category => !['s', 'e', 'happy', 'sad', 'Cute'].includes(category.toLowerCase()))
             .map(category => (
               <option key={category} value={category}>{category}</option>
             ))}
@@ -183,7 +185,20 @@ function HomePage() {
                   ))}
               </select>
               <input name="description" placeholder="Description*" value={newBoard.description} onChange={handleInputChange} />
-              <input name="image" placeholder="Image URL*" value={newBoard.image} onChange={handleInputChange} />
+              <input
+                type="file"
+                accept="image/png, image/jpeg, image/jpg, image/gif"
+                onChange={(e) => {
+                  const file = e.target.files[0];
+                  if (file) {
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                      setNewBoard(prev => ({ ...prev, image: reader.result }));
+                    };
+                    reader.readAsDataURL(file);
+                  }
+                }}
+              />
               <input name="author" placeholder="Author" value={newBoard.author} onChange={handleInputChange} />
               <button onClick={handleCreateBoard}>Add Board</button>
 
@@ -194,7 +209,13 @@ function HomePage() {
 
       <div className="board-grid">
         {boards.map(board => (
-          <BoardCard key={board.id} board={board} onDelete={handleDeleteBoard} onClick={() => setActiveBoard(board)} author={board.author} />
+          <BoardCard
+            key={board.id}
+            board={board}
+            onDelete={handleDeleteBoard}
+            onClick={() => navigate(`/boards/${board.id}`)}
+            author={board.author}
+          />
         ))}
       </div>
 
@@ -203,7 +224,13 @@ function HomePage() {
           <h2>Your Created Boards</h2>
           <div className="board-grid">
             {userBoards.map(board => (
-              <BoardCard key={board.id} board={board} onDelete={handleDeleteBoard} onClick={() => setActiveBoard(board)} author={board.author} />
+              <BoardCard
+                key={board.id}
+                board={board}
+                onDelete={handleDeleteBoard}
+                onClick={() => navigate(`/boards/${board.id}`)}
+                author={board.author}
+              />
             ))}
           </div>
         </div>
