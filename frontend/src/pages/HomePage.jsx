@@ -5,6 +5,7 @@ import Header from '../components/Header.jsx';
 import Footer from '../components/Footer.jsx';
 import logo from '../components/logo.png';
 import './HomePage.css';
+import { getMyProfile } from '../api/apiService';
 
 function HomePage() {
   const [boards, setBoards] = useState([]);
@@ -16,13 +17,19 @@ function HomePage() {
     title: '', 
     category: '',
     description: '',
-    image: '',
-    author: ''
+    image: ''
   });
   const [activeBoard, setActiveBoard] = useState(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
+    // Get logged-in user ID if available
+    const token = localStorage.getItem('token');
+    if (token) {
+      getMyProfile(token).then(user => setCurrentUserId(user.id)).catch(() => setCurrentUserId(null));
+    }
     fetchBoards();
   }, []);
 
@@ -30,7 +37,6 @@ function HomePage() {
     try {
       const response = await fetch('http://localhost:4000/api/boards');
       let data = await response.json();
-      console.log(data);
       if (data.length === 0) {
         data = [{
           id: 'welcome',
@@ -38,27 +44,27 @@ function HomePage() {
           description: 'Start your first kudos board by filling out the form below.',
           category: 'Welcome',
           author: 'System',
-          image: 'https://media.giphy.com/media/3o7aCVpL3yLS5QfU4o/giphy.gif'
+          image: '/logo.png',
+          createdAt: new Date().toISOString()
         }];
       }
       setBoards(data);
     } catch (error) {
-      console.error('Error fetching boards:', error);
-      // Set welcome board on error
       setBoards([{
         id: 'welcome',
         title: 'Welcome to Kudos!',
         description: 'Start your first kudos board by filling out the form below.',
         category: 'Welcome',
         author: 'System',
-        image: 'https://media.giphy.com/media/3o7aCVpL3yLS5QfU4o/giphy.gif'
+        image: '/logo.png',
+        createdAt: new Date().toISOString()
       }]);
     }
   };
 
   const handleSearch = () => {
     const filtered = boards.filter(board =>
-      board.title.toLowerCase().includes(searchQuery.toLowerCase())
+      board.title && board.title.toLowerCase().includes(searchQuery.toLowerCase())
     );
     setBoards(filtered);
   };
@@ -115,26 +121,38 @@ function HomePage() {
       console.error('Error creating board:', error);
       alert(`Failed to create board: ${error.message}`);
     }
-  };
+    const created = await response.json();
+    setBoards(prev => [created, ...prev]);
+    setUserBoards(prev => [created, ...prev]);
+    setActiveBoard(created);
+    setNewBoard({ title: '', category: '', description: '', image: '' });
+    setShowCreateModal(false);
+  } catch (error) {
+    alert(`Failed to create board: ${error.message}`);
+  }
+};
 
   const handleDeleteBoard = async (id) => {
+    const token = localStorage.getItem('token');
     try {
-      const response = await fetch(`http://localhost:4000/api/boards/${id}`, { 
-        method: 'DELETE' 
+      const response = await fetch(`http://localhost:4000/api/boards/${id}`, {
+        method: 'DELETE',
+        headers: token ? { 'Authorization': `Bearer ${token}` } : {}
       });
-      
       if (!response.ok) {
         throw new Error(`Failed to delete board: ${response.status}`);
       }
-      
       fetchBoards();
     } catch (error) {
-      console.error('Error deleting board:', error);
       alert(`Failed to delete board: ${error.message}`);
     }
   };
 
-  // Function to reload the page and reset all state
+  // Card click handler for navigation
+  const handleViewBoard = (board) => {
+    navigate(`/board/${board.id}`);
+  };
+
   const handleLogoClick = () => {
     window.location.reload();
   };
@@ -146,7 +164,6 @@ function HomePage() {
   return (
     <div className="homepage">
       <Header onLogoClick={handleLogoClick} />
-
       <div className="filters">
         <button onClick={() => handleFilter('All')}>All</button>
         <button onClick={() => handleFilter('Recent')}>Recent</button>
@@ -166,7 +183,6 @@ function HomePage() {
           + Create Board
         </button>
       </div>
-
       {showCreateModal && (
         <div className="modal-backdrop" onClick={() => setShowCreateModal(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -201,12 +217,10 @@ function HomePage() {
               />
               <input name="author" placeholder="Author" value={newBoard.author} onChange={handleInputChange} />
               <button onClick={handleCreateBoard}>Add Board</button>
-
             </div>
           </div>
         </div>
       )}
-
       <div className="board-grid">
         {boards.map(board => (
           <BoardCard
@@ -218,7 +232,6 @@ function HomePage() {
           />
         ))}
       </div>
-
       {userBoards.length > 0 && (
         <div className="user-board-list">
           <h2>Your Created Boards</h2>
@@ -235,11 +248,10 @@ function HomePage() {
           </div>
         </div>
       )}
-
       {activeBoard && (
         <div className="modal-backdrop" onClick={() => setActiveBoard(null)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <img src={activeBoard.image || 'placeholder.jpg'} alt={activeBoard.title} />
+            <img src={activeBoard.image || '/logo.png'} alt={activeBoard.title} />
             <h3>{activeBoard.title}</h3>
             <p>{activeBoard.description}</p>
             <p><em>{activeBoard.author}</em></p>
@@ -251,7 +263,6 @@ function HomePage() {
           </div>
         </div>
       )}
-
       <Footer />
     </div>
   );
