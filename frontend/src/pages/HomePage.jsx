@@ -107,6 +107,7 @@ function HomePage() {
       setUserBoards(prev => [created, ...prev]);
       setActiveBoard(created);
       setNewBoard({ title: '', category: '', description: '', image: '', author: '' });
+      console.log(err.message('Not setting'))
       setShowCreateModal(false);
     } catch (error) {
       console.error('Error creating board:', error);
@@ -153,9 +154,11 @@ function HomePage() {
           <option value="Sad">Sad</option>
           <option value="Cute">Cute</option>
           <option value="Cool">Cool</option>
-          {[...new Set(boards.map(board => board.category))].map(category => (
-            <option key={category} value={category}>{category}</option>
-          ))}
+          {[...new Set(boards.map(board => board.category))]
+            .filter(category => !['s', 'e', 'happy', 'sad'].includes(category.toLowerCase()))
+            .map(category => (
+              <option key={category} value={category}>{category}</option>
+            ))}
         </select>
         <button onClick={() => setShowCreateModal(prev => !prev)}>
           + Create Board
@@ -167,11 +170,23 @@ function HomePage() {
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="create-board">
               <input name="title" placeholder="Title*" value={newBoard.title} onChange={handleInputChange} />
-              <input name="category" placeholder="Category*" value={newBoard.category} onChange={handleInputChange} />
+              <select name="category" value={newBoard.category} onChange={handleInputChange}>
+                <option value="" disabled>Select Category*</option>
+                <option value="Happy">Happy</option>
+                <option value="Sad">Sad</option>
+                <option value="Cute">Cute</option>
+                <option value="Cool">Cool</option>
+                {[...new Set(boards.map(board => board.category))]
+                  .filter(category => !['s', 'e', 'happy', 'sad'].includes(category.toLowerCase()))
+                  .map(category => (
+                    <option key={category} value={category}>{category}</option>
+                  ))}
+              </select>
               <input name="description" placeholder="Description*" value={newBoard.description} onChange={handleInputChange} />
               <input name="image" placeholder="Image URL*" value={newBoard.image} onChange={handleInputChange} />
               <input name="author" placeholder="Author" value={newBoard.author} onChange={handleInputChange} />
               <button onClick={handleCreateBoard}>Add Board</button>
+
             </div>
           </div>
         </div>
@@ -179,7 +194,7 @@ function HomePage() {
 
       <div className="board-grid">
         {boards.map(board => (
-          <BoardCard key={board.id} board={board} onDelete={handleDeleteBoard} onClick={() => setActiveBoard(board)} />
+          <BoardCard key={board.id} board={board} onDelete={handleDeleteBoard} onClick={() => setActiveBoard(board)} author={board.author} />
         ))}
       </div>
 
@@ -188,7 +203,7 @@ function HomePage() {
           <h2>Your Created Boards</h2>
           <div className="board-grid">
             {userBoards.map(board => (
-              <BoardCard key={board.id} board={board} onDelete={handleDeleteBoard} onClick={() => setActiveBoard(board)} />
+              <BoardCard key={board.id} board={board} onDelete={handleDeleteBoard} onClick={() => setActiveBoard(board)} author={board.author} />
             ))}
           </div>
         </div>
