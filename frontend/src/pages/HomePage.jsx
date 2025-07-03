@@ -9,11 +9,12 @@ import { getMyProfile } from '../api/apiService';
 
 function HomePage() {
   const [boards, setBoards] = useState([]);
+  const navigate = useNavigate();
   const [userBoards, setUserBoards] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState('All');
   const [newBoard, setNewBoard] = useState({
-    title: '',
+    title: '', 
     category: '',
     description: '',
     image: ''
@@ -92,38 +93,33 @@ function HomePage() {
     setNewBoard({ ...newBoard, [e.target.name]: e.target.value });
   };
 
-  const handleImageUpload = (e) => {
-  const file = e.target.files[0];
-  if (file) {
-    if (file.size > 1024 * 1024) { // 1MB limit
-      alert('Image is too large. Please select an image under 1MB.');
-      return;
+  const handleCreateBoard = async () => {
+    const { title, category, description, image, author } = newBoard;
+    if (!title || !category || !description || !image) {
+      return alert('Title, Category, Description, and Image are required');
     }
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setNewBoard(prev => ({ ...prev, image: reader.result }));
-    };
-    reader.readAsDataURL(file);
-  }
-};
-
-const handleCreateBoard = async () => {
-  let { title, category, description, image } = newBoard;
-  if (!title || !category || !description) {
-    return alert('Title, Category, and Description are required');
-  }
-  // Use /logo.png if no image or if image is via.placeholder.com
-  if (!image || image.includes('via.placeholder.com')) {
-    image = '/logo.png';
-  }
-  try {
-    const response = await fetch('http://localhost:4000/api/boards', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title, category, description, image }),
-    });
-    if (!response.ok) {
-      throw new Error(`Failed to create board: ${response.status}`);
+    
+    try {
+      const response = await fetch('http://localhost:4000/api/boards', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newBoard),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to create board: ${response.status}`);
+      }
+      
+      const created = await response.json();
+      setBoards(prev => [created, ...prev]);
+      setUserBoards(prev => [created, ...prev]);
+      setActiveBoard(created);
+      setNewBoard({ title: '', category: '', description: '', image: '', author: '' });
+      console.log('Board created:', created);
+      setShowCreateModal(false);
+    } catch (error) {
+      console.error('Error creating board:', error);
+      alert(`Failed to create board: ${error.message}`);
     }
     const created = await response.json();
     setBoards(prev => [created, ...prev]);
@@ -205,12 +201,21 @@ const handleCreateBoard = async () => {
                   ))}
               </select>
               <input name="description" placeholder="Description*" value={newBoard.description} onChange={handleInputChange} />
-              {/* File upload for image */}
               <input
                 type="file"
                 accept="image/png, image/jpeg, image/jpg, image/gif"
-                onChange={handleImageUpload}
+                onChange={(e) => {
+                  const file = e.target.files[0];
+                  if (file) {
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                      setNewBoard(prev => ({ ...prev, image: reader.result }));
+                    };
+                    reader.readAsDataURL(file);
+                  }
+                }}
               />
+              <input name="author" placeholder="Author" value={newBoard.author} onChange={handleInputChange} />
               <button onClick={handleCreateBoard}>Add Board</button>
             </div>
           </div>
@@ -222,8 +227,8 @@ const handleCreateBoard = async () => {
             key={board.id}
             board={board}
             onDelete={handleDeleteBoard}
-            onView={handleViewBoard}
-            currentUserId={currentUserId}
+            onClick={() => navigate(`/boards/${board.id}`)}
+            author={board.author}
           />
         ))}
       </div>
@@ -236,8 +241,8 @@ const handleCreateBoard = async () => {
                 key={board.id}
                 board={board}
                 onDelete={handleDeleteBoard}
-                onView={handleViewBoard}
-                currentUserId={currentUserId}
+                onClick={() => navigate(`/boards/${board.id}`)}
+                author={board.author}
               />
             ))}
           </div>
