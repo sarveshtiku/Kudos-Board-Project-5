@@ -2,8 +2,6 @@
 
 Submitted by: **Sarvesh Tiku, Paola Negron, Liliana Cantero**
 
-Deployed Application (optional): [Kudos Board Deployed Site](ADD_LINK_HERE)
-
 ### Application Features
 
 #### CORE FEATURES
@@ -82,54 +80,6 @@ Deployed Application (optional): [Kudos Board Deployed Site](ADD_LINK_HERE)
 
 
 ####  Stretch Features
-
-- [ ] **Deployment**
-  - [ ] Website is deployed via Render.
-- [ ] **Comments**
-  - [ ] Users can add comments to cards.
-  - [ ] To successfully add a comment, users must specify a text message body.
-  - [ ] Users are given the option to specify the author of the comment.
-  - [ ] Users can view comments on card in a pop-up modal that displays the card's:
-    - [ ] Text message 
-    - [ ] Gif
-    - [ ] Author (if specified)
-    - [ ] A list of the card's comments and each comment's:
-      - [ ] Message body
-      - [ ] Author (if specified)
-  - [ ] Users can add multiple comments to a single card.
-- [ ] **Dark Mode** 
-  - [ ] Users can toggle between light mode and dark mode using a button displayed on the:
-    - [ ] Home Page
-    - [ ] Board Pages
-  - [ ] When the button is clicked, the color theme switches to the opposite of the current mode. 
-  - [ ] When dark mode is enabled:
-    - [ ] Text and icons use a light color
-    - [ ] The background uses a dark color
-    - [ ] Color contrast has at least a 4.5:1 ratio using this [color contrast checker](https://webaim.org/resources/contrastchecker/)
-  - [ ] When light mode is enabled:
-    - [ ] Text and icons use a dark color
-    - [ ] The background uses a light color
-    - [ ] Color contrast has at least a 4.5:1 ratio using this [color contrast checker](https://webaim.org/resources/contrastchecker/)
-  - [ ] The chosen mode (light or dark) persists when navigating from home page to board pages and vice versa.
-  - [ ] When the user first visits the site the theme defaults to light mode.
-  - [ ] **VIDEO WALKTHROUGH SPECIAL INSTRUCTIONS**: To ease the grading process, please use the [color contrast checker](https://webaim.org/resources/contrastchecker/) to demonstrate to the grading team that text and background colors on your website have appropriate contrast in both light and dark mode. The Contrast Ratio should be above 4.5:1 and should have a green box surrounding it. 
-- [ ] **Pinned Cards**
-  - [ ] Users can pin a card to the top of the board.
-  - [ ] A Pin button is displayed on each card.
-  - [ ] When the user clicks the Pin button of an unpinned card:
-    - [ ] The card moves to the top of the grid view for that board.
-    - [ ] There is some visual feedback to indicate a card's pin status (e.g., a pin icon, a border highlight).
-    - [ ] The pin action is saved so that the card remains pinned after page refreshes.
-  - [ ] When the user clicks the Pin button of a pinned card:
-    - [ ] The card returns to its original position in the grid based on its creation time or to the end of the grid.
-    - [ ] The card's pin status (e.g., a pin icon or highlight)  is removed.
-    - [ ] The unpin action is saved so that the card remains unpinned after page refresh.
-  - [ ] Pinned cards always appear at the top of the board, above unpinned cards.
-  - [ ] If multiple cards are pinned, they maintain their pinned order based on the time they were pinned.
-    - [ ] More recent pins should appear first.
-- [ ] The pinned state of a card persists when:
-  - [ ] navigating away from and back to the board.
-  - [ ] refreshing the page. 
 - [x] **User Accounts**
   - [x] Users should be able to log in with a username and password.
   - [x] Users should be able to sign up for a new account.
