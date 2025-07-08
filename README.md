@@ -89,10 +89,6 @@ Submitted by: **Sarvesh Tiku, Paola Negron, Liliana Cantero**
   - [x] Allow boards to be deleted only if they are owned by the user.
 
 
-### Walkthrough Video
-
-https://www.loom.com/share/b9ba6efeac5649b4a19b53534126bbae?sid=0b509031-c8aa-4000-ab2a-f6f17bc7d9cb
-
 ### Reflection
 
 * Did the topics discussed in your labs prepare you to complete the assignment? Be specific, which features in your weekly assignment did you feel unprepared to complete?
